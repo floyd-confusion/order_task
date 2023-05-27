@@ -52,25 +52,7 @@ async def broadcast_over_websocket(message):
         for connection in active_connections:
             await connection.send_text(message)
     except:
-        print('No websocket connected; skipping update')     
-
-def validate_body(order):
-    error_response = {}
-
-    if not order.stocks or not order.quantity:
-        error_response["message"] = "At least one required parameter is missing"
-        error_response["code"] = 10
-        return error_response
-    elif order.stocks[:3] not in available_currencies or order.stocks[3:] not in available_currencies:
-        error_response["message"] = "Invalid currency pair"
-        error_response["code"] = 21
-    elif order.quantity <= 0:
-        error_response["message"] = "Invalid quantity"
-        error_response["code"] = 22
-
-    return error_response  
-
-    
+        print('No websocket connected; skipping update')         
 
 def process_order(orderBody):
     new_order = Order(stocks=orderBody.stocks, quantity=orderBody.quantity)
