@@ -1,3 +1,5 @@
+import asyncio
+import random
 from pydantic import ValidationError
 import uvicorn
 from fastapi import FastAPI, WebSocket, status
@@ -30,6 +32,7 @@ async def create_order(orderBody: dict):
         )
 
     orders_db.append(new_order)
+    asyncio.create_task(execute_order(new_order.id))
 
     response_body = {"id": new_order.id, "status": new_order.status}
 
@@ -94,8 +97,21 @@ def give_error(message: str, code: int) -> dict:
     return {"message": message, "code": code}
 
 
+async def execute_order(order_id):
+    # Wait for a random delay between 1 and 10 seconds
+    await asyncio.sleep(random.uniform(1, 10))
+
+    # Change the status of the order to 'executed'
+    for order in orders_db:
+        if order.id == order_id:
+            # Change the status of the order to 'executed'
+            order.status = "EXECUTED"
+            await broadcast_over_websocket(f"Order {order.id} has been executed")
+            break
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
 
 
 # USD USD currency pair can not exist

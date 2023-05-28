@@ -65,3 +65,8 @@ def test_delete_order(mocker, order_id, order_id_target, status_code, final_stat
 
     assert test_request.status_code == status_code
     assert test_order_db[0].status == final_status
+
+
+# def test_websocket():
+#     with client.websocket_connect("/ws") as websocket:
+#         assert data == {"msg": "Hello WebSocket"}
