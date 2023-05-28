@@ -47,16 +47,13 @@ async def websocket_endpoint(websocket: WebSocket):
         #think about keep-alive mechanism
         await websocket.receive_text()
 
-async def broadcast_over_websocket(message):
-    try:
+async def broadcast_over_websocket(message: str):
+    if len(active_connections) > 0:
         for connection in active_connections:
             await connection.send_text(message)
-    except:
+    else:
         print('No websocket connected; skipping update')         
 
-def process_order(orderBody):
-    new_order = Order(stocks=orderBody.stocks, quantity=orderBody.quantity)
-    return new_order
 
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8000)

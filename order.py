@@ -16,11 +16,6 @@ class StatusEnum(Enum):
   canceled = 2
 
   
-@validator("stocks")
-def check_currency_pair(cls, value):    
-    if value[:3] not in available_currencies or value[3:] not in available_currencies:
-        raise ValueError("Invalid stock name")
-    return value
 
 class Order(BaseModel):
   status: StatusEnum = StatusEnum.pending
@@ -28,9 +23,11 @@ class Order(BaseModel):
   stocks: str = Field(..., min_length=6, max_length=6)
   quantity: NonNegativeFloat
 
-
-
-
-
+  @validator("stocks")
+  def check_currency_pair(value: str):    
+    value = value.upper()
+    if value[:3] not in available_currencies or value[3:] not in available_currencies:
+        raise ValueError("Invalid stock name")
+    return value
 
 
