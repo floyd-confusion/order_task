@@ -1,3 +1,4 @@
 .vscode/
 sdet_task/
 __pycache__/
+htmlcov/
