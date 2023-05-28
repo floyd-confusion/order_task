@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, NonNegativeFloat, validator
 
@@ -18,7 +19,7 @@ class StatusEnum(Enum):
   
 
 class Order(BaseModel):
-  status: StatusEnum = StatusEnum.pending
+  status: str = Literal["PENDING", "EXECUTED", "CANCELLED"] 
   id: UUID = Field(default_factory=give_id)
   stocks: str = Field(..., min_length=6, max_length=6)
   quantity: NonNegativeFloat
@@ -29,5 +30,3 @@ class Order(BaseModel):
     if value[:3] not in available_currencies or value[3:] not in available_currencies:
         raise ValueError("Invalid stock name")
     return value
-
-
