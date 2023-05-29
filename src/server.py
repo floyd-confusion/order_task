@@ -2,7 +2,7 @@ import asyncio
 import random
 from pydantic import ValidationError
 import uvicorn
-from fastapi import FastAPI, WebSocket, status
+from fastapi import FastAPI, Response, WebSocket, status
 from fastapi.responses import JSONResponse
 from src.order import Order, retrieve_order
 
@@ -63,17 +63,17 @@ async def read_item() -> list:
 
 
 @app.delete("/orders/{order_id}")
-async def delete_order(order_id: str) -> dict:
+async def delete_order(order_id: str):
     order = retrieve_order(order_id=order_id, order_list=orders_db, delete=True)
 
     if order:
-        response_body = None
         response_code = status.HTTP_204_NO_CONTENT
+        await broadcast_over_websocket(f"Order {order.id} has been cancelled")
+        return Response(status_code=response_code)
     else:
         response_body = give_error(f"Order {order_id} not found", 40)
         response_code = status.HTTP_404_NOT_FOUND
-
-    return JSONResponse(status_code=response_code, content=response_body)
+        return JSONResponse(status_code=response_code, content=response_body)
 
 
 @app.websocket("/ws")
@@ -98,13 +98,10 @@ def give_error(message: str, code: int) -> dict:
 
 
 async def execute_order(order_id):
-    # Wait for a random delay between 1 and 10 seconds
     await asyncio.sleep(random.uniform(1, 10))
 
-    # Change the status of the order to 'executed'
     for order in orders_db:
         if order.id == order_id:
-            # Change the status of the order to 'executed'
             order.status = "EXECUTED"
             await broadcast_over_websocket(f"Order {order.id} has been executed")
             break
@@ -112,6 +109,3 @@ async def execute_order(order_id):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
-
-# USD USD currency pair can not exist
